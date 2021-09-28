@@ -6,8 +6,8 @@ services:
     ports:
       - 3001:3001
     depends_on:
-      - ipython2mint-api
-      - ipython2mint-worker
+      - ipython2mint_api
+      - ipython2mint_worker
 
   ipython2mint_api:
     image: mintproject/ipython2mint-api
@@ -40,7 +40,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      - ipython2mint-api
+      - ipython2mint_api
       - redis
       - dind
     networks:
