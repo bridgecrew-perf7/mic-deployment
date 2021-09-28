@@ -44,6 +44,7 @@ services:
       - dind
     networks:
       dind:
+      default:
 
   #Redis stores the celery status
   redis:
