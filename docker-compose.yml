@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  frontend:
+    image:
+
+  #ipython2mint api
+  ipython2mint_api:
+    build: ./project
+    ports:
+      - 8004:8000
+    command: uvicorn main:app --host 0.0.0.0 --reload
+    volumes:
+      - ./project:/usr/src/app
+      - logs:/var/log/stream
+      - specs:/srv/specs
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+    networks: 
+      common:
+
+  #Celery worker
+  ipython2mint_worker:
+    build:
+      context: ./project
+      dockerfile: Dockerfile-celery
+    command: celery worker --app=worker.celery --loglevel=info
+    volumes:
+      - dind-certs-client:/certs/client
+      - logs:/usr/src/app/logs
+      - specs:/usr/src/app/specs
+    environment: 
+      - DOCKER_TLS_CERTDIR=/certs
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_HOST=tcp://docker:2376
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - web
+      - redis
+    networks:
+      common:
+      dind:
+
+  #Redis stores the celery status
+  redis:
+    image: redis:6-alpine
+    networks:
+      common:
+
+  #Database of MAT api
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_USER=test
+      - POSTGRES_DB=mat
+    volumes:
+        - db_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      common:
+
+  #Docker Instance used by repo2docker
+  dind:
+    image: docker:dind
+    container_name: dind
+    restart: unless-stopped
+    privileged: true
+    environment: 
+      - DOCKER_TLS_CERTDIR=/certs
+    volumes: 
+      - dind-certs-ca:/certs/ca
+      - dind-certs-client:/certs/client
+    networks: 
+      dind:
+        aliases:
+          - docker
+
+networks:
+  dind:
+  common:
+
+volumes:
+  dind-certs-ca:
+  dind-certs-client:
+  logs:
+  specs:
+  db_data:
