@@ -8,6 +8,7 @@ services:
     depends_on:
       - ipython2mint_api
       - ipython2mint_worker
+      - postgres
 
   ipython2mint_api:
     image: mintproject/ipython2mint-api
