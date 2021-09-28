@@ -10,12 +10,11 @@ services:
       - ipython2mint_worker
 
   ipython2mint_api:
-    image: mintproject/ipython2cwl-api
+    image: mintproject/ipython2mint-api
     ports:
       - 8004:8000
     command: uvicorn main:app --host 0.0.0.0 --reload
     volumes:
-      - ./project:/usr/src/app
       - logs:/var/log/stream
       - specs:/srv/specs
     environment:
@@ -28,7 +27,7 @@ services:
 
   #Celery worker
   ipython2mint_worker:
-    image: mintproject/ipython2cwl-worker
+    image: mintproject/ipython2mint-worker
     command: celery worker --app=worker.celery --loglevel=info
     volumes:
       - dind-certs-client:/certs/client
