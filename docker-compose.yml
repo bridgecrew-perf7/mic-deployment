@@ -2,15 +2,15 @@ version: '3.8'
 
 services:
   mic_api:
-    image: mintproject/mic_api
+    image: mintproject/mic-api
     ports:
       - 3001:3001
     depends_on:
-      - ipython2mint_api
-      - ipython2mint_worker
+      - ipython2mint-api
+      - ipython2mint-worker
 
   ipython2mint_api:
-    image: mintproject/ipython2mint_api
+    image: mintproject/ipython2mint-api
     ports:
       - 8004:8000
     command: uvicorn main:app --host 0.0.0.0 --reload
@@ -27,7 +27,7 @@ services:
 
   #Celery worker
   ipython2mint_worker:
-    image: mintproject/ipython2mint_worker
+    image: mintproject/ipython2mint-worker
     command: celery worker --app=worker.celery --loglevel=info
     volumes:
       - dind-certs-client:/certs/client
@@ -40,7 +40,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      - ipython2mint_api
+      - ipython2mint-api
       - redis
       - dind
     networks:
