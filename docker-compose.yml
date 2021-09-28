@@ -1,12 +1,13 @@
 version: '3.8'
 
 services:
-  frontend:
-    image:
+  mic_api:
+    image: mintproject/mic_api
+    ports:
+      - 3001:3001
 
-  #ipython2mint api
   ipython2mint_api:
-    build: ./project
+    image: mintproject/ipython2cwl-api
     ports:
       - 8004:8000
     command: uvicorn main:app --host 0.0.0.0 --reload
@@ -24,9 +25,7 @@ services:
 
   #Celery worker
   ipython2mint_worker:
-    build:
-      context: ./project
-      dockerfile: Dockerfile-celery
+    image: mintproject/ipython2cwl-worker
     command: celery worker --app=worker.celery --loglevel=info
     volumes:
       - dind-certs-client:/certs/client
