@@ -23,8 +23,6 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - redis
-    networks: 
-      common:
 
   #Celery worker
   ipython2mint_worker:
@@ -45,14 +43,11 @@ services:
       - redis
       - dind
     networks:
-      common:
       dind:
 
   #Redis stores the celery status
   redis:
     image: redis:6-alpine
-    networks:
-      common:
 
   #Database of MAT api
   postgres:
@@ -64,10 +59,6 @@ services:
       - POSTGRES_DB=mat
     volumes:
         - db_data:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
-    networks:
-      common:
 
   #Docker Instance used by repo2docker
   dind:
@@ -87,7 +78,9 @@ services:
 
 networks:
   dind:
-  common:
+  default:
+    external:
+      name: shared
 
 volumes:
   dind-certs-ca:
