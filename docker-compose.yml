@@ -23,6 +23,8 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - redis
+    env_file:
+      - .env
 
   #Celery worker
   ipython2mint_worker:
@@ -45,6 +47,8 @@ services:
     networks:
       dind:
       default:
+    env_file:
+      - .env
 
   #Redis stores the celery status
   redis:
@@ -52,7 +56,7 @@ services:
 
   #Database of MAT api
   postgres:
-    image: postgres
+    image: postgres:13
     restart: always
     environment:
       - POSTGRES_PASSWORD=test
@@ -76,7 +80,14 @@ services:
       dind:
         aliases:
           - docker
-
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "docker", "system", "info"]
+      interval: 1s
+      timeout: 3s
+      retries: 20
+      
 networks:
   dind:
   default:
