@@ -15,40 +15,37 @@ services:
     ports:
       - 8004:8000
     command: uvicorn main:app --host 0.0.0.0 --reload
-    volumes:
-      - logs:/var/log/stream
-      - specs:/srv/specs
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      - redis
+      redis:
+        condition: service_started
+      dind:
+        condition: service_healthy
     env_file:
       - .env-docker
-
+    volumes:
+      - dind-certs-client:/certs/client
+      - logs:/var/log/stream
+      - specs:/srv/specs
   #Celery worker
   ipython2mint_worker:
     image: mintproject/ipython2mint-worker
     command: celery worker --app=worker.celery --loglevel=info
-    volumes:
-      - dind-certs-client:/certs/client
-      - logs:/usr/src/app/logs
-      - specs:/usr/src/app/specs
-    environment: 
-      - DOCKER_TLS_CERTDIR=/certs
-      - DOCKER_CERT_PATH=/certs/client
-      - DOCKER_HOST=tcp://docker:2376
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      - ipython2mint_api
-      - redis
-      - dind
+      redis:
+        condition: service_started
+      dind:
+        condition: service_healthy
+      ipython2mint_api:
+        condition: service_started
     networks:
       dind:
       default:
     env_file:
       - .env-docker
+    volumes:
+      - dind-certs-client:/certs/client
+      - logs:/usr/src/app/logs
+      - specs:/usr/src/app/specs
 
   #Redis stores the celery status
   redis:
@@ -71,8 +68,6 @@ services:
     container_name: dind
     restart: unless-stopped
     privileged: true
-    environment: 
-      - DOCKER_TLS_CERTDIR=/certs
     volumes: 
       - dind-certs-ca:/certs/ca
       - dind-certs-client:/certs/client
