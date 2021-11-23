@@ -26,6 +26,9 @@ services:
       - dind-certs-client:/certs/client
       - logs:/var/log/stream
       - specs:/srv/specs
+    networks:
+      dind:
+      default:
   #Celery worker
   ipython2mint_worker:
     image: mintproject/ipython2mint-worker
