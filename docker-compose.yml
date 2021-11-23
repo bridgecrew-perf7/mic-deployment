@@ -24,7 +24,7 @@ services:
     depends_on:
       - redis
     env_file:
-      - .env
+      - .env-docker
 
   #Celery worker
   ipython2mint_worker:
@@ -48,7 +48,7 @@ services:
       dind:
       default:
     env_file:
-      - .env
+      - .env-docker
 
   #Redis stores the celery status
   redis:
@@ -81,7 +81,7 @@ services:
         aliases:
           - docker
     env_file:
-      - .env
+      - .env-docker
     healthcheck:
       test: ["CMD", "docker", "system", "info"]
       interval: 1s
